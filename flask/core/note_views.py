@@ -4,6 +4,8 @@ from core.models import Task, Note
 from flask_migrate import Migrate
 from sqlalchemy import exc
 
+import core.logging_conf
+
 migrate = Migrate(app, db)
 
 @app.route('/')
@@ -28,6 +30,7 @@ def get_note(note_id):
         note_data = {'id': note.id, 'note_name': note.name, 'note': note.desc}
         return jsonify({'note': note_data})
     else:
+        app.logger.info(f" Requested note with id {note_id} not found")
         return jsonify({'error': 'Note not found'}), 404
 
 
@@ -41,6 +44,8 @@ def add_note():
     new_note = Note(name=note_name, desc=note_desc)
     db.session.add(new_note)
     db.session.commit()
+
+    app.logger.info({'msg': f'note with id {new_note.id} added successfully'})
     return jsonify({'msg': f'note with id {new_note.id} added successfully'})
 
 
@@ -57,8 +62,11 @@ def update_note(note_id):
             note.desc = data['desc']
         
         db.session.commit()
+
+        app.logger.info({'msg': f'note with id {note_id} updated successfully'})
         return jsonify({'message': 'Note  updated'}), 200
     else:
+        app.logger.info(f" Requested note with id {note_id} not found")
         return jsonify({'error': 'Note not found'}), 404
 
     
@@ -69,8 +77,10 @@ def delete_note(note_id):
     if note:
         db.session.delete(note)
         db.session.commit()
-        return jsonify({'msg': f'user with {note.id} deleted successfully'})
+        app.logger.info({'msg': f'note with {note_id} deleted successfully'})
+        return jsonify({'msg': f'note with {note.id} deleted successfully'})
     else:
+        app.logger.info({'error': f'Note with id {note_id} not found'})
         return jsonify({'error': 'Note not found'}), 404
 
 

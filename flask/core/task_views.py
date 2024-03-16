@@ -3,6 +3,7 @@ from core.models import app, db
 from core.models import Task, Note
 from flask_migrate import Migrate
 from sqlalchemy import exc
+import core.logging_conf
 
 migrate = Migrate(app, db)
 
@@ -23,6 +24,7 @@ def get_task(task_id):
         task_data = {'id': task.id, 'task_name': task.name, 'task': task.desc}
         return jsonify({'task': task_data})
     else:
+        app.logger.info(f" Requested task with id {task_id} not found")
         return jsonify({'error': 'Task not found'}), 404
 
 
@@ -37,16 +39,18 @@ def add_task():
         new_task = Task(name=task_name, desc=task_desc)
         db.session.add(new_task)
         db.session.commit()
-        return jsonify({'msg': f'note with id {new_task.id} added successfully'})
+        app.logger.info({'msg': f'task with id {new_task.id} added successfully'})
+        return jsonify({'msg': f'task with id {new_task.id} added successfully'})
     except exc.IntegrityError:
         db.session.rollback()
+        app.logger.info({'msg': f'UNIQUE constraint failed, duplicate entry'})
         return jsonify({'msg': f'UNIQUE constraint failed, duplicate entry'})
 
 
 @app.route('/api/v1/tasks/<int:task_id>', methods=['PUT'])
 def update_task(task_id):
 
-    note = Task.query.get(task_id)
+    task = Task.query.get(task_id)
 
     if task:
         data = request.get_json()   
@@ -56,10 +60,12 @@ def update_task(task_id):
             task.desc = data['desc']
         
         db.session.commit()
-    
+
+        app.logger.info({'msg': f'task with id {task_id} updated successfully'})
         return jsonify({'message': 'Task  updated'}), 200
 
     else:
+        app.logger.info(f" Requested task with id {task_id} not found")
         return jsonify({'error': 'Task not found'}), 404
 
     
@@ -70,7 +76,9 @@ def delete_task(task_id):
     if task:
         db.session.delete(task)
         db.session.commit()
-        return jsonify({'msg': f'user with {task.id} deleted successfully'})
+        app.logger.info({'msg': f'task with {task_id} deleted successfully'})
+        return jsonify({'msg': f'task with {task.id} deleted successfully'})
     else:
+        app.logger.info({'error': f'Task with id {task_id} not found'})
         return jsonify({'error': 'Task not found'}), 404
 
