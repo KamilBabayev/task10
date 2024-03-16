@@ -26,7 +26,7 @@ def get_task(task_id):
         return jsonify({'error': 'Task not found'}), 404
 
 
-@app.route('/api/v1/add_task', methods=['POST'])
+@app.route('/api/v1/tasks', methods=['POST'])
 def add_task():
     data = request.get_json()
     
