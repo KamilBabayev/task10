@@ -7,5 +7,9 @@ import core.note_views
 
 migrate = Migrate(app, db)
 
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"message": "route not found"})
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)

@@ -74,3 +74,4 @@ def delete_note(note_id):
         return jsonify({'error': 'Note not found'}), 404
 
 
+
