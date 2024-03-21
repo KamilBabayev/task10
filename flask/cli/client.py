@@ -1,5 +1,6 @@
 import requests
 import click
+from tabulate import tabulate
 
 api_url = 'http://localhost:5000/api/v1/'
 
@@ -50,25 +51,70 @@ def get(id, all):
     if id is None and all is False:
         print("enter --id <id> to get specific note or --all to get all notes")
     elif id is None and all is True:
-        print("make get request to get all notes")
         req = requests.get(api_url + "notes")
-        print(req.json())
+
+        if len(req.json()['Notes']) == 0:
+            print(req.json())
+            return
+        
+        print("got all notes for you")
+        notes = []
+        for note in req.json()['Notes']:
+            notes.append([str(note['id']), note['name'], note['desc']])
+
+        headers = ["Id", "note_name", "note_desc"]
+        table = tabulate(notes, headers=headers, tablefmt="grid", numalign="center")
+        
+        print(table)
+
     elif id and all is False:
-        print(f"get note details with id {id}")
         req = requests.get(api_url + "notes" + "/" + str(id))
-        print(req.json())
+
+        print(f"get note details with id {id}")
+        if req.status_code == 404:
+            print(req.json())
+            return
+        
+        note = req.json()['note']
+        data = [[str(note['id']), note['note_name'], note['note']]]
+        headers = ["Id", "note_name", "note_desc"]
+        table = tabulate(data, headers=headers, tablefmt="grid", numalign="center")
+        print(table)
 
 @note.command('add', help='add new note')
-def add():
-    click.echo('Add new note')
+@click.option('--name', '-n', type=str, help='add note name')
+@click.option('--desc', '-d', type=str, help='add note description')
+def add(name, desc):
+    if name is None or desc is None:
+        print("enter note --name <name> and --desc <desc> to add")
+        return
+    
+    data = {'name': name, 'desc': desc}
+    req = requests.post(api_url + 'notes', json=data)
+    print(req.json())
 
 @note.command('update', help='update note')
-def add():
-    click.echo('Update note')
+@click.option('--id', '-i', type=str, help='add note id')
+@click.option('--name', '-n', type=str, help='add note name')
+@click.option('--desc', '-d', type=str, help='add note description')
+def update(id, name, desc):
+    if id is None and name is None and desc is None or \
+        name is None and desc is None:
+        print("enter note --id <id> and --name <name> or --desc <desc> to update")
+        return
+    
+    data = {'id': id, 'name': name, 'desc': desc}
+    req = requests.put(api_url + 'notes' + '/' + str(id), json=data)
+    print(req.json())
 
 @note.command('delete', help='delete note')
-def add():
-    click.echo('Delete note')
+@click.option('--id', '-i', type=str, help='add note id')
+def delete(id):
+    if id is None:
+        print("enter note --id to delete")
+        return
+    req = requests.delete(api_url + 'notes' + '/' + str(id))
+    print(req.json())
 
 cli.add_command(task)
 cli.add_command(note)
