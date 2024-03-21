@@ -11,7 +11,7 @@ I have intended to use any stack on api side. after starting rest api app, we wi
 - implement cli tool version in other languages also.
 
 
-```
+```bash
 click, tabulate and requests should be installed in order to use cli tool.
 
 python3 client.py 
@@ -29,7 +29,7 @@ We have 2 subcommands, note and task for managing them from cli accordingly.
 
 How to manage subcommands, example notes:
 
-```
+```bash
 python3 client.py note
 Usage: client.py note [OPTIONS] COMMAND [ARGS]...
 
@@ -46,7 +46,7 @@ Commands:
 ```
 
 To see help menu use --help
-```
+```bash
 python3 client.py note get --help
 
 Usage: client.py note get [OPTIONS]     
@@ -60,14 +60,14 @@ Options:
 ```
 
 To get all notes
-```
+```bash
 python3 client.py note get --all
 
 {'Notes': []}
 ```
 
 Let us add new note
-```
+```bash
 python3 client.py note add --help
 
 Usage: client.py note add [OPTIONS]
@@ -81,7 +81,7 @@ Options:
 ```
 
 We need to give name and desc to add new note
-```
+```bash
 python3 client.py note add --name test_note01 --desc "write document for new feature"
 
 {'msg': 'note with id 1 added successfully'}
@@ -92,7 +92,7 @@ python3 client.py note add --name google_toolbox_url --desc "https://toolbox.goo
 ```
 
 to see all notes
-```
+```bash
 python3 client.py note get --all
 
 got all notes for you
@@ -105,7 +105,7 @@ got all notes for you
 +------+--------------------+------------------------------------------+
 ```
 To see specific note, ex: 2
-```
+```bash
 python3 client.py note get --id 2
 
 get note details with id 2
@@ -116,7 +116,7 @@ get note details with id 2
 +------+--------------------+------------------------------------------+
 ```
 To delete note, let us see its --help
-```
+```bash
 python3 client.py note delete --help
 
 Usage: client.py note delete [OPTIONS]
@@ -128,14 +128,14 @@ Options:
   --help         Show this message and exit.
 ```
 Let us delete note 2
-```
+```bash
 python3 client.py note delete --id 2
 
 {'msg': 'note with 2 deleted successfully'}
 ```
 
 We now have only note with id 1
-```
+```bash
 python3 client.py note get --all
 
 got all notes for you
@@ -147,7 +147,7 @@ got all notes for you
 ```
 
 Update subcommand help
-```
+```bash
 python3 client.py note update --help
 
 Usage: client.py note update [OPTIONS]        
@@ -161,13 +161,13 @@ Options:
   --help           Show this message and exit.
 ```
 let us update note 1
-```
+```bash
 python3 client.py note update --id 1 --name "test_note_UPDATED" --desc "UPDATE: dont write doc, done by teammate"
 
 {'message': 'Note  updated'}
 ```
 To see update
-```
+```bash
 python3 client.py note get --id 1
 
 get note details with id 1
