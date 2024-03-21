@@ -9,3 +9,4 @@ services:
       - .:/app
     environment:
       - FLASK_ENV=development
+    command: bash -c "flask db upgrade && python app.py"
