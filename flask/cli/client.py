@@ -98,9 +98,10 @@ def add(name, desc):
 @click.option('--name', '-n', type=str, help='add note name')
 @click.option('--desc', '-d', type=str, help='add note description')
 def update(id, name, desc):
+    print(id, name, desc)
     if id is None and name is None and desc is None or \
-        name is None and desc is None:
-        print("enter note --id <id> and --name <name> or --desc <desc> to update")
+        name is None and desc is None or name is None or desc is None:
+        print("enter note --id <id> and --name <name> --desc <desc> to update")
         return
     
     data = {'id': id, 'name': name, 'desc': desc}
