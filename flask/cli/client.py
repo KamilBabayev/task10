@@ -23,25 +23,71 @@ def get(id, all):
     if id is None and all is False:
         print("enter --id <id> to get specific task or --all to get all tasks")
     elif id is None and all is True:
-        print("make get request to get all tasks")
         req = requests.get(api_url + "tasks")
-        print(req.json())
+
+        if len(req.json()['Tasks']) == 0:
+            print(req.json())
+            return
+        
+        print("got all tasks for you")
+        tasks = []
+        for task in req.json()['Tasks']:
+            tasks.append([str(task['id']), task['name'], task['desc']])
+
+        headers = ["Id", "task_name", "task_desc"]
+        table = tabulate(tasks, headers=headers, tablefmt="grid", numalign="center")
+        
+        print(table)
+
     elif id and all is False:
-        print(f"get task details with id {id}")
         req = requests.get(api_url + "tasks" + "/" + str(id))
-        print(req.json())
+
+        print(f"get task details with id {id}")
+        if req.status_code == 404:
+            print(req.json())
+            return
+        
+        task = req.json()['task']
+        data = [[str(task['id']), task['task_name'], task['task']]]
+        headers = ["Id", "task_name", "task_desc"]
+        table = tabulate(data, headers=headers, tablefmt="grid", numalign="center")
+        print(table)
 
 @task.command('add', help='add new task')
-def add():
-    click.echo('Add new task')
+@click.option('--name', '-n', type=str, help='add task name')
+@click.option('--desc', '-d', type=str, help='add task description')
+def add(name, desc):
+    if name is None or desc is None:
+        print("enter task --name <name> and --desc <desc> to add")
+        return
+    
+    data = {'name': name, 'desc': desc}
+    req = requests.post(api_url + 'tasks', json=data)
+    print(req.json())
 
 @task.command('update', help='update task')
-def add():
-    click.echo('Update task')
+@click.option('--id', '-i', type=str, help='add task id')
+@click.option('--name', '-n', type=str, help='add task name')
+@click.option('--desc', '-d', type=str, help='add task description')
+def update(id, name, desc):
+    if id is None and name is None and desc is None or \
+        name is None and desc is None or name is None or desc is None:
+        print("enter task --id <id> and --name <name> --desc <desc> to update")
+        return
+    
+    data = {'id': id, 'name': name, 'desc': desc}
+    req = requests.put(api_url + 'tasks' + '/' + str(id), json=data)
+    print(req.json())
+
 
 @task.command('delete', help='delete task')
-def add():
-    click.echo('Delete task')
+@click.option('--id', '-i', type=str, help='add task id')
+def delete(id):
+    if id is None:
+        print("enter task --id to delete")
+        return
+    req = requests.delete(api_url + 'tasks' + '/' + str(id))
+    print(req.json())
 
 
 @note.command('get', help='get note details')
@@ -98,7 +144,6 @@ def add(name, desc):
 @click.option('--name', '-n', type=str, help='add note name')
 @click.option('--desc', '-d', type=str, help='add note description')
 def update(id, name, desc):
-    print(id, name, desc)
     if id is None and name is None and desc is None or \
         name is None and desc is None or name is None or desc is None:
         print("enter note --id <id> and --name <name> --desc <desc> to update")

@@ -51,7 +51,7 @@ def add_task():
 def update_task(task_id):
 
     task = Task.query.get(task_id)
-
+    
     if task:
         data = request.get_json()   
         if 'name' in data:
@@ -59,7 +59,11 @@ def update_task(task_id):
         if 'desc' in data:
             task.desc = data['desc']
         
-        db.session.commit()
+        try:
+            db.session.commit()
+        except exc.IntegrityError:
+            app.logger.error(f" Error update duplicate task with id {task_id}")
+            return jsonify({'error': 'Duplicate  entry'}), 500
 
         app.logger.info({'msg': f'task with id {task_id} updated successfully'})
         return jsonify({'message': 'Task  updated'}), 200
