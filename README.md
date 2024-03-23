@@ -177,3 +177,50 @@ get note details with id 1
 |  1   | test_note_UPDATED | UPDATE: dont write doc, done by teammate |
 +------+-------------------+------------------------------------------+
 ```
+
+#### tasks mgmt is similar to notes, tasks has additional date and status column
+
+```bash
+python3 client.py task add --name task01 --desc "refactor code"
+
+{'msg': 'task with id 1 added successfully'}
+```
+
+get all tasks
+```bash
+python3 client.py task get --all
+
+got all tasks for you
++------+-------------+----------------------------+---------------------+----------+
+|  Id  | task_name   | task_desc                  | created_at          | status   |
++======+=============+============================+=====================+==========+
+|  1   | task01      | refactor code              | 2024-03-23 06:44:11 | open     |
++------+-------------+----------------------------+---------------------+----------+
+|  2   | task02      | attend in incident meeting | 2024-03-23 06:44:48 | open     |
++------+-------------+----------------------------+---------------------+----------+
+|  3   | task03      | prepare design doc         | 2024-03-23 06:45:18 | open     |
++------+-------------+----------------------------+---------------------+----------+
+```
+
+update task status as in_progress
+```bash
+python3 client.py task update --id 1 --status in_progress
+
+{'message': 'Task  updated'}
+```
+
+```bash
+python3 client.py task get --all
+
+got all tasks for you
++------+-------------+----------------------------+---------------------+-------------+
+|  Id  | task_name   | task_desc                  | created_at          | status      |
++======+=============+============================+=====================+=============+
+|  1   | task01      | refactor code              | 2024-03-23 06:44:11 | in_progress |
++------+-------------+----------------------------+---------------------+-------------+
+|  2   | task02      | attend in incident meeting | 2024-03-23 06:44:48 | open        |
++------+-------------+----------------------------+---------------------+-------------+
+|  3   | task03      | prepare design doc         | 2024-03-23 06:45:18 | done        |
++------+-------------+----------------------------+---------------------+-------------+
+```
+
