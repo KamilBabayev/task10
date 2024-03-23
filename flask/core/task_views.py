@@ -10,8 +10,9 @@ migrate = Migrate(app, db)
 @app.route('/api/v1/tasks', methods=['GET'])
 def get_all_tasks():
     data = Task.query.all()
-    tasks = [{'id': task.id, 'name': task.name, 'desc': task.desc} 
-             for task in data]
+    tasks = [{'id': task.id, 'name': task.name, 'desc': task.desc, 
+              'status': task.status, 'created_at': task.created_at} 
+              for task in data]
 
     return jsonify({'Tasks': tasks})
 
@@ -19,9 +20,14 @@ def get_all_tasks():
 @app.route('/api/v1/tasks/<int:task_id>', methods=['GET'])
 def get_task(task_id):
     task = Task.query.filter_by(id=task_id).first()
-
     if task:
-        task_data = {'id': task.id, 'task_name': task.name, 'task': task.desc}
+        task_data = { 'id': task.id, 
+                      'task_name': task.name,
+                      'task': task.desc,
+                      'status': task.status,
+                      'created_at': task.created_at }
+        
+        app.logger.info(task_data)
         return jsonify({'task': task_data})
     else:
         app.logger.info(f" Requested task with id {task_id} not found")

@@ -1,6 +1,7 @@
 import requests
 import click
 from tabulate import tabulate
+from datetime import datetime
 
 api_url = 'http://localhost:5000/api/v1/'
 
@@ -32,9 +33,11 @@ def get(id, all):
         print("got all tasks for you")
         tasks = []
         for task in req.json()['Tasks']:
-            tasks.append([str(task['id']), task['name'], task['desc']])
+            task_date = datetime.strptime(task['created_at'], "%a, %d %b %Y %H:%M:%S %Z")
+            tasks.append([ str(task['id']), task['name'], task['desc'], 
+                           task_date, task['status'] ])
 
-        headers = ["Id", "task_name", "task_desc"]
+        headers = ["Id", "task_name", "task_desc", "created_at", "status"]
         table = tabulate(tasks, headers=headers, tablefmt="grid", numalign="center")
         
         print(table)
@@ -48,8 +51,11 @@ def get(id, all):
             return
         
         task = req.json()['task']
-        data = [[str(task['id']), task['task_name'], task['task']]]
-        headers = ["Id", "task_name", "task_desc"]
+        task_date = datetime.strptime(task['created_at'], "%a, %d %b %Y %H:%M:%S %Z")
+        data = [[str(task['id']), task['task_name'], task['task'], 
+                 task_date, task['status']]]
+        
+        headers = ["Id", "task_name", "task_desc", "created_at", "status"]
         table = tabulate(data, headers=headers, tablefmt="grid", numalign="center")
         print(table)
 
@@ -162,8 +168,10 @@ def delete(id):
     req = requests.delete(api_url + 'notes' + '/' + str(id))
     print(req.json())
 
+
 cli.add_command(task)
 cli.add_command(note)
+
 
 if __name__ == '__main__':
     cli()
