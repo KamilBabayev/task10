@@ -75,12 +75,19 @@ def add(name, desc):
 @click.option('--id', '-i', type=str, help='add task id')
 @click.option('--name', '-n', type=str, help='add task name')
 @click.option('--desc', '-d', type=str, help='add task description')
-def update(id, name, desc):
-    if id is None and name is None and desc is None or \
+@click.option('--status', '-s', type=str, help='add task description')
+def update(id, name, desc, status):
+    if id and status:
+            data = {'id': id, 'status': status}
+            req = requests.put(api_url + 'tasks' + '/' + str(id), json=data)
+            print(req.json())
+            return
+
+    elif id is None and name is None and desc is None or \
         name is None and desc is None or name is None or desc is None:
         print("enter task --id <id> and --name <name> --desc <desc> to update")
         return
-    
+
     data = {'id': id, 'name': name, 'desc': desc}
     req = requests.put(api_url + 'tasks' + '/' + str(id), json=data)
     print(req.json())

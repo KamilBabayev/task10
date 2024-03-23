@@ -59,12 +59,18 @@ def update_task(task_id):
     task = Task.query.get(task_id)
     
     if task:
-        data = request.get_json()   
+        data = request.get_json()
+
         if 'name' in data:
             task.name = data['name']
         if 'desc' in data:
             task.desc = data['desc']
+        if 'status' in data:
+            if data['status'] not in ['open', 'in_progress', 'done']:
+                return jsonify({'msg': 'task status can only be \'open\' \'in_progress\' \'done\''})
+            task.status = data['status']
         
+    
         try:
             db.session.commit()
         except exc.IntegrityError:
