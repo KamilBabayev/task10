@@ -1,13 +1,36 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
+	"strconv"
 )
 
 var noteIdFlag int
 var allNotesFlag bool
+
+const rest_api string = "http://localhost:5000"
+
+type Note struct {
+	Desc string `json:"desc"`
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type NotesResponse struct {
+	Notes []Note `json:"Notes"`
+}
+
+type SpecificNote struct {
+	Id       int    `json:"id"`
+	Note     string `json:"note"`
+	NoteName string `json:"note_name"`
+}
 
 func main() {
 	var rootCmd = &cobra.Command{
@@ -52,7 +75,30 @@ func main() {
 		Long:  "get note details",
 		Run: func(cmd *cobra.Command, args []string) {
 			if allNotesFlag && len(args) == 0 && noteIdFlag == 0 {
-				fmt.Println("Getting all notes from remote api endpoint api/v1/notes")
+				fmt.Println("Getting all notes from remote api endpoint api/v1/notes\n")
+
+				resp, err := http.Get(rest_api + "/api/v1/notes")
+				if err != nil {
+					panic(err)
+				}
+				defer resp.Body.Close()
+
+				body, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					log.Fatal("Error reading response body:", err)
+				}
+
+				var notesResponse NotesResponse
+				err = json.Unmarshal(body, &notesResponse)
+				if err != nil {
+					log.Fatal("Error marhsalling to struct from json:", err)
+				}
+
+				fmt.Println("ID\tName\tDescription")
+				for _, note := range notesResponse.Notes {
+					fmt.Printf("%d  %s\t%s\n", note.ID, note.Name, note.Desc)
+				}
+
 				return
 
 			} else if !allNotesFlag && len(args) == 0 && noteIdFlag == 0 {
@@ -64,6 +110,28 @@ func main() {
 				return
 			} else if !allNotesFlag && len(args) == 0 && noteIdFlag != 0 {
 				fmt.Printf("getting note id %d from api\n", noteIdFlag)
+				resp, err := http.Get(rest_api + "/api/v1/notes/" + strconv.Itoa(noteIdFlag))
+				if err != nil {
+					panic(err)
+				}
+				defer resp.Body.Close()
+
+				body, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					log.Fatal("Error reading response body:", err)
+				}
+
+				// var note Note
+				var note struct{ Note SpecificNote }
+				err = json.Unmarshal(body, &note)
+				if err != nil {
+					log.Fatal("Error marhsalling to struct from json:", err)
+				}
+
+				fmt.Println("\nID\tName\tDescription")
+				fmt.Printf("%d\t%s\t%s\n", note.Note.Id,
+					note.Note.NoteName, note.Note.Note)
+
 			}
 
 		},
