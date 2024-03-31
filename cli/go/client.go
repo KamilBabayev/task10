@@ -94,9 +94,9 @@ func main() {
 					log.Fatal("Error marhsalling to struct from json:", err)
 				}
 
-				fmt.Println("ID\tName\tDescription")
+				fmt.Println("Id\tName\t\tDescription")
 				for _, note := range notesResponse.Notes {
-					fmt.Printf("%d  %s\t%s\n", note.ID, note.Name, note.Desc)
+					fmt.Printf("%d\t%s\t\t%s\n", note.ID, note.Name, note.Desc)
 				}
 
 				return
@@ -128,8 +128,8 @@ func main() {
 					log.Fatal("Error marhsalling to struct from json:", err)
 				}
 
-				fmt.Println("\nID\tName\tDescription")
-				fmt.Printf("%d\t%s\t%s\n", note.Note.Id,
+				fmt.Println("\nId\tName\t\tDescription")
+				fmt.Printf("%d\t%s\t\t%s\n", note.Note.Id,
 					note.Note.NoteName, note.Note.Note)
 
 			}
