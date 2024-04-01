@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
@@ -10,7 +11,6 @@ import (
 	"os"
 	"strconv"
 	"text/tabwriter"
-	"bytes"
 )
 
 var noteIdFlag int
@@ -151,7 +151,6 @@ func main() {
 	noteGetCmd.Flags().IntVarP(&noteIdFlag, "id", "i", 0, "get specified note")
 	noteGetCmd.Flags().BoolVarP(&allNotesFlag, "all", "a", false, "get all notes")
 
-
 	noteAddCmd := &cobra.Command{
 		Use:   "add",
 		Short: "add new note",
@@ -159,11 +158,11 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("")
 
-			if len(args) == 0 && len(addNoteNameFlag) == 0 && len(addNoteDescFlag) == 0{
+			if len(args) == 0 && len(addNoteNameFlag) == 0 && len(addNoteDescFlag) == 0 {
 				fmt.Println("enter note --name <name> and --desc <desc> to add")
 				return
 			} else if len(addNoteNameFlag) > 0 && len(addNoteDescFlag) > 0 {
-				
+
 				note := map[string]string{
 					"name": addNoteNameFlag,
 					"desc": addNoteDescFlag,
@@ -175,8 +174,8 @@ func main() {
 					return
 				}
 
-				resp, err := http.Post(rest_api + "/api/v1/notes", "application/json", 
-									   bytes.NewBuffer(jsonData))
+				resp, err := http.Post(rest_api+"/api/v1/notes", "application/json",
+					bytes.NewBuffer(jsonData))
 				if err != nil {
 					fmt.Println("Error:", err)
 					return
@@ -191,15 +190,14 @@ func main() {
 
 				fmt.Println("msg:", ResponseBody["msg"])
 
-
-			} else if (len(addNoteNameFlag) > 0 || len(addNoteDescFlag) == 0) || 
-					  (len(addNoteNameFlag) == 0 || len(addNoteDescFlag) > 0) {
+			} else if (len(addNoteNameFlag) > 0 || len(addNoteDescFlag) == 0) ||
+				(len(addNoteNameFlag) == 0 || len(addNoteDescFlag) > 0) {
 				fmt.Println("enter both --name <name> and --desc <desc>")
 				return
 			}
 		},
 	}
-	
+
 	noteAddCmd.Flags().StringVarP(&addNoteNameFlag, "name", "n", "", "new note name")
 	noteAddCmd.Flags().StringVarP(&addNoteDescFlag, "desc", "d", "", "new note description")
 
