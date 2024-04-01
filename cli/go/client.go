@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"text/tabwriter"
 )
 
 var noteIdFlag int
@@ -94,11 +95,13 @@ func main() {
 					log.Fatal("Error marhsalling to struct from json:", err)
 				}
 
+				w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 				fmt.Println("Id\tName\t\tDescription")
-				for _, note := range notesResponse.Notes {
-					fmt.Printf("%d\t%s\t\t%s\n", note.ID, note.Name, note.Desc)
-				}
 
+				for _, note := range notesResponse.Notes {
+					fmt.Fprintf(w, "%d\t%s\t%s\n", note.ID, note.Name, note.Desc)
+				}
+				w.Flush()
 				return
 
 			} else if !allNotesFlag && len(args) == 0 && noteIdFlag == 0 {
