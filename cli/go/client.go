@@ -75,6 +75,9 @@ func main() {
 		Short: "get note details",
 		Long:  "get note details",
 		Run: func(cmd *cobra.Command, args []string) {
+
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
+
 			if allNotesFlag && len(args) == 0 && noteIdFlag == 0 {
 				fmt.Println("Getting all notes from remote api endpoint api/v1/notes\n")
 
@@ -95,14 +98,13 @@ func main() {
 					log.Fatal("Error marhsalling to struct from json:", err)
 				}
 
-				w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 				fmt.Fprintln(w, "ID\tName\tDescription")
 
 				for _, note := range notesResponse.Notes {
 					fmt.Fprintf(w, "%d\t%s\t%s\n", note.ID, note.Name, note.Desc)
 				}
 				w.Flush()
-				
+
 				return
 
 			} else if !allNotesFlag && len(args) == 0 && noteIdFlag == 0 {
@@ -125,16 +127,18 @@ func main() {
 					log.Fatal("Error reading response body:", err)
 				}
 
-				// var note Note
 				var note struct{ Note SpecificNote }
+
 				err = json.Unmarshal(body, &note)
 				if err != nil {
 					log.Fatal("Error marhsalling to struct from json:", err)
 				}
 
 				fmt.Println("\nId\tName\t\tDescription")
+
 				fmt.Printf("%d\t%s\t\t%s\n", note.Note.Id,
 					note.Note.NoteName, note.Note.Note)
+				w.Flush()
 
 			}
 
