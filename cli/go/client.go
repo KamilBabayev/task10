@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"text/tabwriter"
+	"bytes"
 )
 
 var noteIdFlag int
@@ -156,14 +157,41 @@ func main() {
 		Short: "add new note",
 		Long:  "get new note",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(args, len(args), len(addNoteNameFlag), addNoteDescFlag)
-			
+			fmt.Println("")
+
 			if len(args) == 0 && len(addNoteNameFlag) == 0 && len(addNoteDescFlag) == 0{
 				fmt.Println("enter note --name <name> and --desc <desc> to add")
 				return
 			} else if len(addNoteNameFlag) > 0 && len(addNoteDescFlag) > 0 {
-				fmt.Println("adding new note")
-				return
+				
+				note := map[string]string{
+					"name": addNoteNameFlag,
+					"desc": addNoteDescFlag,
+				}
+
+				jsonData, err := json.Marshal(note)
+				if err != nil {
+					fmt.Println("Error:", err)
+					return
+				}
+
+				resp, err := http.Post(rest_api + "/api/v1/notes", "application/json", 
+									   bytes.NewBuffer(jsonData))
+				if err != nil {
+					fmt.Println("Error:", err)
+					return
+				}
+				defer resp.Body.Close()
+
+				var ResponseBody map[string]interface{}
+				if err := json.NewDecoder(resp.Body).Decode(&ResponseBody); err != nil {
+					fmt.Println("Error:", err)
+					return
+				}
+
+				fmt.Println("msg:", ResponseBody["msg"])
+
+
 			} else if (len(addNoteNameFlag) > 0 || len(addNoteDescFlag) == 0) || 
 					  (len(addNoteNameFlag) == 0 || len(addNoteDescFlag) > 0) {
 				fmt.Println("enter both --name <name> and --desc <desc>")
