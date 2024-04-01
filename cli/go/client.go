@@ -14,6 +14,8 @@ import (
 
 var noteIdFlag int
 var allNotesFlag bool
+var addNoteNameFlag string
+var addNoteDescFlag string
 
 const rest_api string = "http://localhost:5000"
 
@@ -148,17 +150,30 @@ func main() {
 	noteGetCmd.Flags().IntVarP(&noteIdFlag, "id", "i", 0, "get specified note")
 	noteGetCmd.Flags().BoolVarP(&allNotesFlag, "all", "a", false, "get all notes")
 
+
 	noteAddCmd := &cobra.Command{
 		Use:   "add",
 		Short: "add new note",
 		Long:  "get new note",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) == 0 {
+			fmt.Println(args, len(args), len(addNoteNameFlag), addNoteDescFlag)
+			
+			if len(args) == 0 && len(addNoteNameFlag) == 0 && len(addNoteDescFlag) == 0{
 				fmt.Println("enter note --name <name> and --desc <desc> to add")
+				return
+			} else if len(addNoteNameFlag) > 0 && len(addNoteDescFlag) > 0 {
+				fmt.Println("adding new note")
+				return
+			} else if (len(addNoteNameFlag) > 0 || len(addNoteDescFlag) == 0) || 
+					  (len(addNoteNameFlag) == 0 || len(addNoteDescFlag) > 0) {
+				fmt.Println("enter both --name <name> and --desc <desc>")
 				return
 			}
 		},
 	}
+	
+	noteAddCmd.Flags().StringVarP(&addNoteNameFlag, "name", "n", "", "new note name")
+	noteAddCmd.Flags().StringVarP(&addNoteDescFlag, "desc", "d", "", "new note description")
 
 	noteUpdateCmd := &cobra.Command{
 		Use:   "update",
