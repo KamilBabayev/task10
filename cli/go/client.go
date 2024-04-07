@@ -15,9 +15,8 @@ import (
 
 var noteIdFlag int
 var allNotesFlag bool
-var addNoteNameFlag string
-var addNoteDescFlag string
-var delNoteFlag int
+var noteNameFlag string
+var noteDescFlag string
 
 const rest_api string = "http://localhost:5000"
 
@@ -158,14 +157,14 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("")
 
-			if len(args) == 0 && len(addNoteNameFlag) == 0 && len(addNoteDescFlag) == 0 {
+			if len(args) == 0 && len(noteNameFlag) == 0 && len(noteDescFlag) == 0 {
 				fmt.Println("enter note --name <name> and --desc <desc> to add")
 				return
-			} else if len(addNoteNameFlag) > 0 && len(addNoteDescFlag) > 0 {
+			} else if len(noteNameFlag) > 0 && len(noteDescFlag) > 0 {
 
 				note := map[string]string{
-					"name": addNoteNameFlag,
-					"desc": addNoteDescFlag,
+					"name": noteNameFlag,
+					"desc": noteDescFlag,
 				}
 
 				jsonData, err := json.Marshal(note)
@@ -190,15 +189,15 @@ func main() {
 
 				fmt.Println("msg:", ResponseBody["msg"])
 
-			} else if (len(addNoteNameFlag) > 0 || len(addNoteDescFlag) == 0) ||
-				(len(addNoteNameFlag) == 0 || len(addNoteDescFlag) > 0) {
+			} else if (len(noteNameFlag) > 0 || len(noteDescFlag) == 0) ||
+				(len(noteNameFlag) == 0 || len(noteDescFlag) > 0) {
 				fmt.Println("enter both --name <name> and --desc <desc>")
 				return
 			}
 		},
 	}
-	noteAddCmd.Flags().StringVarP(&addNoteNameFlag, "name", "n", "", "new note name")
-	noteAddCmd.Flags().StringVarP(&addNoteDescFlag, "desc", "d", "", "new note description")
+	noteAddCmd.Flags().StringVarP(&noteNameFlag, "name", "n", "", "new note name")
+	noteAddCmd.Flags().StringVarP(&noteDescFlag, "desc", "d", "", "new note description")
 
 	noteUpdateCmd := &cobra.Command{
 		Use:   "update",
@@ -217,14 +216,14 @@ func main() {
 		Short: "delete note",
 		Long:  "delete note",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) == 0 && delNoteFlag == 0 {
+			if len(args) == 0 && noteIdFlag == 0 {
 				fmt.Println("enter note id --id <note_id> to delete")
 				return
-			} else if len(args) == 0 && delNoteFlag != 0 {
+			} else if len(args) == 0 && noteIdFlag != 0 {
 				client := &http.Client{}
 
 				req, err := http.NewRequest("DELETE", rest_api+"/api/v1/notes/"+
-					strconv.Itoa(delNoteFlag), nil)
+					strconv.Itoa(noteIdFlag), nil)
 				if err != nil {
 					fmt.Println("Error sending request", err)
 					return
@@ -248,7 +247,7 @@ func main() {
 
 		},
 	}
-	noteDeleteCmd.Flags().IntVarP(&delNoteFlag, "id", "i", 0, "specify note id to delete")
+	noteDeleteCmd.Flags().IntVarP(&noteIdFlag, "id", "i", 0, "specify note id to delete")
 
 	taskGetCmd := &cobra.Command{
 		Use:   "get",
