@@ -19,6 +19,14 @@ var allNotesFlag bool
 var noteNameFlag string
 var noteDescFlag string
 
+var (
+	taskIdFlag    int
+	taskIdStrFlag string
+	allTasksFlag  bool
+	taskNameFlag  string
+	taskDescFlag  string
+)
+
 const rest_api string = "http://localhost:5000"
 
 type Note struct {
@@ -113,7 +121,6 @@ func main() {
 
 			} else if !allNotesFlag && len(args) == 0 && noteIdFlag == 0 {
 				fmt.Println("enter --id <id> to get specific note or --all to get all notes")
-
 				return
 			} else if allNotesFlag && len(args) > 0 {
 				fmt.Println("--all flag should be run without value")
@@ -208,10 +215,10 @@ func main() {
 			if noteIdFlag == 0 || len(noteNameFlag) == 0 || len(noteDescFlag) == 0 {
 				fmt.Println("enter note --id <id> and --name <name> --desc <desc> to update")
 				return
-			} else if  noteIdFlag != 0 && len(noteNameFlag) != 0 && len(noteDescFlag) != 0 {
+			} else if noteIdFlag != 0 && len(noteNameFlag) != 0 && len(noteDescFlag) != 0 {
 				fmt.Println("create struct as json")
 				note := map[string]string{
-					"id": noteIdStrFlag,
+					"id":   noteIdStrFlag,
 					"name": noteNameFlag,
 					"desc": noteDescFlag,
 				}
@@ -222,7 +229,7 @@ func main() {
 					return
 				}
 
-				req, err := http.NewRequest("PUT", rest_api + "/api/v1/notes/" + strconv.Itoa(noteIdFlag), bytes.NewBuffer(jsonData))
+				req, err := http.NewRequest("PUT", rest_api+"/api/v1/notes/"+strconv.Itoa(noteIdFlag), bytes.NewBuffer(jsonData))
 				if err != nil {
 					fmt.Println("error", err)
 					return
@@ -291,18 +298,32 @@ func main() {
 	}
 	noteDeleteCmd.Flags().IntVarP(&noteIdFlag, "id", "i", 0, "specify note id to delete")
 
+
 	taskGetCmd := &cobra.Command{
 		Use:   "get",
 		Short: "get task details",
 		Long:  "get task details",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) == 0 {
-				fmt.Println("enter --id <id> to get specific note or --all to get all notes")
+			fmt.Println(args, allTasksFlag, taskIdFlag)
+			if allTasksFlag && len(args) == 0 && taskIdFlag == 0 {
+				fmt.Println("getting all tasks")
+				return
+			} else if allTasksFlag && len(args) > 0 {
+				fmt.Println("--all flag should be run without value")
+				return
+			} else if !allTasksFlag && len(args) == 0 && taskIdFlag == 0 {
+				fmt.Println("enter --id <id> to get specific task or --all to get all tasks")
+
+				return
+			} else if !allTasksFlag && len(args) == 0 && taskIdFlag != 0 {
+				fmt.Println("get specific task id")
 				return
 			}
 			fmt.Println(args)
 		},
 	}
+	taskGetCmd.Flags().IntVarP(&taskIdFlag, "id", "i", 0, "get specified task")
+	taskGetCmd.Flags().BoolVarP(&allTasksFlag, "all", "a", false, "get all tasks")
 
 	taskAddCmd := &cobra.Command{
 		Use:   "add",
