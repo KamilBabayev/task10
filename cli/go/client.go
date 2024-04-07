@@ -17,6 +17,7 @@ var noteIdFlag int
 var allNotesFlag bool
 var addNoteNameFlag string
 var addNoteDescFlag string
+var delNoteFlag int
 
 const rest_api string = "http://localhost:5000"
 
@@ -147,7 +148,6 @@ func main() {
 
 		},
 	}
-
 	noteGetCmd.Flags().IntVarP(&noteIdFlag, "id", "i", 0, "get specified note")
 	noteGetCmd.Flags().BoolVarP(&allNotesFlag, "all", "a", false, "get all notes")
 
@@ -197,7 +197,6 @@ func main() {
 			}
 		},
 	}
-
 	noteAddCmd.Flags().StringVarP(&addNoteNameFlag, "name", "n", "", "new note name")
 	noteAddCmd.Flags().StringVarP(&addNoteDescFlag, "desc", "d", "", "new note description")
 
@@ -218,12 +217,38 @@ func main() {
 		Short: "delete note",
 		Long:  "delete note",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) == 0 {
-				fmt.Println("enter note --id to delete")
+			if len(args) == 0 && delNoteFlag == 0 {
+				fmt.Println("enter note id --id <note_id> to delete")
 				return
+			} else if len(args) == 0 && delNoteFlag != 0 {
+				client := &http.Client{}
+
+				req, err := http.NewRequest("DELETE", rest_api+"/api/v1/notes/"+
+					strconv.Itoa(delNoteFlag), nil)
+				if err != nil {
+					fmt.Println("Error sending request", err)
+					return
+				}
+
+				resp, err := client.Do(req)
+				if err != nil {
+					fmt.Println("Error sending request", err)
+					return
+				}
+				defer resp.Body.Close()
+
+				body, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					fmt.Println("Error reading response: ", err)
+					return
+				}
+
+				fmt.Println(string(body))
 			}
+
 		},
 	}
+	noteDeleteCmd.Flags().IntVarP(&delNoteFlag, "id", "i", 0, "specify note id to delete")
 
 	taskGetCmd := &cobra.Command{
 		Use:   "get",
