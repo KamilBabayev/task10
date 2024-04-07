@@ -14,6 +14,7 @@ import (
 )
 
 var noteIdFlag int
+var noteIdStrFlag string
 var allNotesFlag bool
 var noteNameFlag string
 var noteDescFlag string
@@ -204,12 +205,53 @@ func main() {
 		Short: "update note",
 		Long:  "update note",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) == 0 {
+			if noteIdFlag == 0 || len(noteNameFlag) == 0 || len(noteDescFlag) == 0 {
 				fmt.Println("enter note --id <id> and --name <name> --desc <desc> to update")
 				return
+			} else if  noteIdFlag != 0 && len(noteNameFlag) != 0 && len(noteDescFlag) != 0 {
+				fmt.Println("create struct as json")
+				note := map[string]string{
+					"id": noteIdStrFlag,
+					"name": noteNameFlag,
+					"desc": noteDescFlag,
+				}
+
+				jsonData, err := json.Marshal(note)
+				if err != nil {
+					fmt.Println("Error", err)
+					return
+				}
+
+				req, err := http.NewRequest("PUT", rest_api + "/api/v1/notes/" + strconv.Itoa(noteIdFlag), bytes.NewBuffer(jsonData))
+				if err != nil {
+					fmt.Println("error", err)
+					return
+				}
+
+				req.Header.Set("Content-Type", "application/json")
+				client := &http.Client{}
+
+				resp, err := client.Do(req)
+				if err != nil {
+					fmt.Println("welcome", err)
+					return
+				}
+				defer resp.Body.Close()
+
+				body, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					fmt.Println("error reading", err)
+					return
+				}
+
+				fmt.Println(resp.Status)
+				fmt.Println(string(body))
 			}
 		},
 	}
+	noteUpdateCmd.Flags().IntVarP(&noteIdFlag, "id", "i", 0, "specify note id to update")
+	noteUpdateCmd.Flags().StringVarP(&noteNameFlag, "name", "n", "", "updated note name")
+	noteUpdateCmd.Flags().StringVarP(&noteDescFlag, "desc", "d", "", "updated note desc")
 
 	noteDeleteCmd := &cobra.Command{
 		Use:   "delete",
