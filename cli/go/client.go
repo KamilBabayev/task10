@@ -57,6 +57,14 @@ type SpecificNote struct {
 	NoteName string `json:"note_name"`
 }
 
+type specificTask struct {
+	CreatedAt string `json:"created_at"`
+	Id        int    `json:"id"`
+	Status    string `json:"status"`
+	Task      string `json:"task"`
+	TaskName  string `json:"task_name"`
+}
+
 func main() {
 	var rootCmd = &cobra.Command{
 		Use:   "client",
@@ -99,7 +107,6 @@ func main() {
 		Short: "get note details",
 		Long:  "get note details",
 		Run: func(cmd *cobra.Command, args []string) {
-
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
 			if allNotesFlag && len(args) == 0 && noteIdFlag == 0 {
@@ -309,14 +316,14 @@ func main() {
 		},
 	}
 	noteDeleteCmd.Flags().IntVarP(&noteIdFlag, "id", "i", 0, "specify note id to delete")
-	
-	t := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
 	taskGetCmd := &cobra.Command{
 		Use:   "get",
 		Short: "get task details",
 		Long:  "get task details",
 		Run: func(cmd *cobra.Command, args []string) {
+			t := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
+
 			if allTasksFlag && len(args) == 0 && taskIdFlag == 0 {
 				fmt.Println("Getting all tasks from remote api endpoint api/v1/tasks\n")
 				resp, err := http.Get(rest_api + "/api/v1/tasks")
@@ -341,11 +348,11 @@ func main() {
 
 				for _, task := range tasksResponse.Tasks {
 					fmt.Fprintf(t, "%d\t%s\t%s\t%s\t%s\n", task.Id, task.Name, task.Status,
-												   task.Created_at, task.Desc)
+						task.Created_at, task.Desc)
 
 				}
 				t.Flush()
-				
+
 				return
 			} else if allTasksFlag && len(args) > 0 {
 				fmt.Println("--all flag should be run without value")
@@ -355,10 +362,38 @@ func main() {
 
 				return
 			} else if !allTasksFlag && len(args) == 0 && taskIdFlag != 0 {
-				fmt.Println("get specific task id")
+				fmt.Printf("getting task id %d from api\n\n", taskIdFlag)
+
+				resp, err := http.Get(rest_api + "/api/v1/tasks/" + strconv.Itoa(taskIdFlag))
+				if err != nil {
+					panic(err)
+				}
+				defer resp.Body.Close()
+
+				body, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					fmt.Println("Eror reading response body", err)
+				}
+
+				type TaskWrapper struct {
+					Task specificTask `json: "task"`
+				}
+
+				var taskWrapper TaskWrapper
+				if err := json.Unmarshal([]byte(body), &taskWrapper); err != nil {
+					fmt.Println("Error:", err)
+					return
+				}
+				// err = json.Unmarshal(body, &task)
+				// fmt.Println(err)
+
+				fmt.Printf("Task CreatedAt: %s\n", taskWrapper.Task.CreatedAt)
+				fmt.Printf("Task Id: %d\n", taskWrapper.Task.Id)
+				fmt.Printf("Task Status: %s\n", taskWrapper.Task.Status)
+				fmt.Printf("Task Name: %s\n", taskWrapper.Task.TaskName)
+				fmt.Printf("Task Task: %s\n", taskWrapper.Task.Task)
 				return
 			}
-			fmt.Println(args)
 		},
 	}
 	taskGetCmd.Flags().IntVarP(&taskIdFlag, "id", "i", 0, "get specified task")
@@ -384,8 +419,8 @@ func main() {
 					return
 				}
 
-				resp, err := http.Post(rest_api + "/api/v1/tasks", "application/json",
-									   bytes.NewBuffer(jsonData))
+				resp, err := http.Post(rest_api+"/api/v1/tasks", "application/json",
+					bytes.NewBuffer(jsonData))
 				if err != nil {
 					fmt.Println("Error while posting task data", err)
 					return
