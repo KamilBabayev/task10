@@ -369,18 +369,55 @@ func main() {
 		Short: "add new task",
 		Long:  "get new task",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) == 0 {
-				fmt.Println("enter note --name <name> and --desc <desc> to add")
+			if len(args) == 0 && len(taskNameFlag) == 0 && len(taskDescFlag) == 0 {
+				fmt.Println("enter task --name <name> and --desc <desc> to add")
 				return
+			} else if len(taskNameFlag) > 0 && len(taskDescFlag) > 0 {
+				task := map[string]string{
+					"name": taskNameFlag,
+					"desc": taskDescFlag,
+				}
+
+				jsonData, err := json.Marshal(task)
+				if err != nil {
+					fmt.Println("Error while marshaling to json", err)
+					return
+				}
+
+				resp, err := http.Post(rest_api + "/api/v1/tasks", "application/json",
+									   bytes.NewBuffer(jsonData))
+				if err != nil {
+					fmt.Println("Error while posting task data", err)
+					return
+				}
+
+				defer resp.Body.Close()
+
+				var ResponseBody map[string]interface{}
+				if err := json.NewDecoder(resp.Body).Decode(&ResponseBody); err != nil {
+					fmt.Println("Error:", err)
+					return
+				}
+
+				fmt.Println("msg:", ResponseBody["msg"])
 			}
 		},
 	}
+	taskAddCmd.Flags().StringVarP(&taskNameFlag, "name", "n", "", "new task name")
+	taskAddCmd.Flags().StringVarP(&taskDescFlag, "desc", "d", "", "new task description")
 
 	taskUpdateCmd := &cobra.Command{
 		Use:   "update",
 		Short: "update task",
 		Long:  "update task",
 		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("")
+
+			if len(args) == 0 && len(taskNameFlag) == 0 && len(taskDescFlag) == 0 {
+				fmt.Println("enter task --name <name> and --desc <desc> to add")
+				return
+			}
+
 			if len(args) == 0 {
 				fmt.Println("enter note --id <id> and --name <name> --desc <desc> to update")
 				return
