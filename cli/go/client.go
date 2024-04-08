@@ -35,8 +35,20 @@ type Note struct {
 	Name string `json:"name"`
 }
 
+type Task struct {
+	Desc       string `json:"desc"`
+	Id         int    `json:"id"`
+	Name       string `json:"name"`
+	Status     string `json: "status`
+	Created_at string `json: "created_at"`
+}
+
 type NotesResponse struct {
 	Notes []Note `json:"Notes"`
+}
+
+type TasksResponse struct {
+	Tasks []Task `json:"Tasks"`
 }
 
 type SpecificNote struct {
@@ -297,16 +309,43 @@ func main() {
 		},
 	}
 	noteDeleteCmd.Flags().IntVarP(&noteIdFlag, "id", "i", 0, "specify note id to delete")
-
+	
+	t := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
 	taskGetCmd := &cobra.Command{
 		Use:   "get",
 		Short: "get task details",
 		Long:  "get task details",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(args, allTasksFlag, taskIdFlag)
 			if allTasksFlag && len(args) == 0 && taskIdFlag == 0 {
-				fmt.Println("getting all tasks")
+				fmt.Println("Getting all tasks from remote api endpoint api/v1/tasks\n")
+				resp, err := http.Get(rest_api + "/api/v1/tasks")
+				if err != nil {
+					fmt.Println("error in connection:", err)
+					return
+				}
+				defer resp.Body.Close()
+
+				body, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					fmt.Println("Error reading response body", err)
+				}
+
+				var tasksResponse TasksResponse
+				err = json.Unmarshal(body, &tasksResponse)
+				if err != nil {
+					log.Fatal("Error marshalling from json to strcut: ", err)
+				}
+
+				fmt.Fprintln(t, "ID\tName\tStatus\tCreated_at\tDescription")
+
+				for _, task := range tasksResponse.Tasks {
+					fmt.Fprintf(t, "%d\t%s\t%s\t%s\t%s\n", task.Id, task.Name, task.Status,
+												   task.Created_at, task.Desc)
+
+				}
+				t.Flush()
+				
 				return
 			} else if allTasksFlag && len(args) > 0 {
 				fmt.Println("--all flag should be run without value")
