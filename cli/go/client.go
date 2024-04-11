@@ -21,11 +21,12 @@ var noteNameFlag string
 var noteDescFlag string
 
 var (
-	taskIdFlag    int
-	taskIdStrFlag string
-	allTasksFlag  bool
-	taskNameFlag  string
-	taskDescFlag  string
+	taskIdFlag     int
+	taskIdStrFlag  string
+	allTasksFlag   bool
+	taskNameFlag   string
+	taskDescFlag   string
+	taskStatusFlag string
 )
 
 const rest_api string = "http://localhost:5000"
@@ -259,7 +260,7 @@ func main() {
 
 				resp, err := client.Do(req)
 				if err != nil {
-					fmt.Println("welcome", err)
+					fmt.Println("error during client request", err)
 					return
 				}
 				defer resp.Body.Close()
@@ -447,18 +448,91 @@ func main() {
 		Long:  "update task",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("")
+			if taskIdFlag != 0 && len(taskStatusFlag) != 0 {
+				task := map[string]interface{}{
+					"id":     taskIdFlag,
+					"status": taskStatusFlag,
+				}
+
+				jsonData, err := json.Marshal(task)
+				if err != nil {
+					fmt.Println("err while converting map to json", err)
+					return
+				}
+
+				req, err := http.NewRequest("PUT", rest_api+"/api/v1/tasks/"+strconv.Itoa(taskIdFlag), bytes.NewBuffer(jsonData))
+				if err != nil {
+					fmt.Println("error during http request", err)
+					return
+				}
+				req.Header.Set("Content-Type", "application/json")
+				client := &http.Client{}
+
+				resp, err := client.Do(req)
+				if err != nil {
+					fmt.Println("error during client connection", err)
+					return
+				}
+				defer resp.Body.Close()
+
+				body, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					fmt.Println("error during reading", err)
+					return
+				}
+
+				fmt.Println(string(body))
+				return
+			}
 
 			if len(args) == 0 && len(taskNameFlag) == 0 && len(taskDescFlag) == 0 {
-				fmt.Println("enter task --name <name> and --desc <desc> to add")
+				fmt.Println("enter task --id <id> --name <name> and --desc <desc> to update")
+				fmt.Println("or enter task --id <id> and --status <status> to update status")
 				return
+			} else if taskIdFlag != 0 && len(taskNameFlag) != 0 && len(taskDescFlag) != 0 {
+				task := map[string]string{
+					"id":   taskIdStrFlag,
+					"name": taskNameFlag,
+					"desc": taskDescFlag,
+				}
+
+				jsonData, err := json.Marshal(task)
+				if err != nil {
+					fmt.Println("error while converting to json", err)
+					return
+				}
+
+				req, err := http.NewRequest("PUT", rest_api+"/api/v1/tasks/"+strconv.Itoa(taskIdFlag), bytes.NewBuffer(jsonData))
+				if err != nil {
+					fmt.Println("error during httpr request", err)
+					return
+				}
+
+				req.Header.Set("Content-Type", "application/json")
+				client := &http.Client{}
+
+				resp, err := client.Do(req)
+				if err != nil {
+					fmt.Println("error during client request", err)
+					return
+				}
+				defer resp.Body.Close()
+
+				body, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					fmt.Println("error reading response body", err)
+					return
+				}
+
+				fmt.Println(string(body))
 			}
 
-			if len(args) == 0 {
-				fmt.Println("enter note --id <id> and --name <name> --desc <desc> to update")
-				return
-			}
 		},
 	}
+	taskUpdateCmd.Flags().IntVarP(&taskIdFlag, "id", "i", 0, "specify task id to update")
+	taskUpdateCmd.Flags().StringVarP(&taskNameFlag, "name", "n", "", "updated task name")
+	taskUpdateCmd.Flags().StringVarP(&taskDescFlag, "desc", "d", "", "updated task description")
+	taskUpdateCmd.Flags().StringVarP(&taskStatusFlag, "status", "s", "", "updated task status")
 
 	taskDeleteCmd := &cobra.Command{
 		Use:   "delete",
