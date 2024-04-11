@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"text/tabwriter"
+
+	"github.com/spf13/cobra"
 )
 
 var noteIdFlag int
@@ -235,7 +236,6 @@ func main() {
 				fmt.Println("enter note --id <id> and --name <name> --desc <desc> to update")
 				return
 			} else if noteIdFlag != 0 && len(noteNameFlag) != 0 && len(noteDescFlag) != 0 {
-				fmt.Println("create struct as json")
 				note := map[string]string{
 					"id":   noteIdStrFlag,
 					"name": noteNameFlag,
@@ -465,12 +465,37 @@ func main() {
 		Short: "delete task",
 		Long:  "delete task",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) == 0 {
+			if len(args) == 0 && taskIdFlag == 0 {
 				fmt.Println("enter note --id to delete")
 				return
+			} else if len(args) == 0 && taskIdFlag != 0 {
+				fmt.Println("deleted task id")
+				client := &http.Client{}
+				req, err := http.NewRequest("DELETE", rest_api+"/api/v1/tasks/"+
+					strconv.Itoa(taskIdFlag), nil)
+				if err != nil {
+					fmt.Println("Error sending request", err)
+					return
+				}
+
+				resp, err := client.Do(req)
+				if err != nil {
+					fmt.Println("Error sending request", err)
+					return
+				}
+				defer resp.Body.Close()
+
+				body, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					fmt.Println("Error reading responce", err)
+					return
+				}
+
+				fmt.Println(string(body))
 			}
 		},
 	}
+	taskDeleteCmd.Flags().IntVarP(&taskIdFlag, "id", "i", 0, "specify task id to delete")
 
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 
