@@ -385,8 +385,6 @@ func main() {
 					fmt.Println("Error:", err)
 					return
 				}
-				// err = json.Unmarshal(body, &task)
-				// fmt.Println(err)
 
 				fmt.Printf("Task CreatedAt: %s\n", taskWrapper.Task.CreatedAt)
 				fmt.Printf("Task Id: %d\n", taskWrapper.Task.Id)

@@ -85,7 +85,7 @@ def update(id, name, desc, status):
 
     elif id is None and name is None and desc is None or \
         name is None and desc is None or name is None or desc is None:
-        print("enter task --id <id> and --name <name> --desc <desc> to update")
+        print("enter task --id <id> and --name <name> --desc <desc> to update or --id <id> and --status <status> to update status")
         return
 
     data = {'id': id, 'name': name, 'desc': desc}
