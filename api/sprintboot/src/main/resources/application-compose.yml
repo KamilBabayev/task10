@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: task-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/taskdb
+    username: taskuser
+    password: admin123
+    driverClassName: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibername:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  hikari:
+    minimum-idle: 5
+    maximum-pool-size: 10
+    idle-timeout: 30000
+    pool-name: HikariPool01
+    max-lifetime: 120000
+    connection-timeout: 20000
+  logging:
+    level:
+      com.zaxxer.hikari: DEBUG
+      org.springframework.jdbc.datasource: DEBUG
