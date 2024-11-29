@@ -3,7 +3,7 @@ import click
 from tabulate import tabulate
 from datetime import datetime
 
-api_url = 'http://localhost:5000/api/v1/'
+api_url = 'http://localhost:8080/api/v1/'
 
 @click.group()
 def cli():

@@ -29,7 +29,7 @@ var (
 	taskStatusFlag string
 )
 
-const rest_api string = "http://localhost:5000"
+const rest_api string = "http://localhost:8080"
 
 type Note struct {
 	Desc string `json:"desc"`

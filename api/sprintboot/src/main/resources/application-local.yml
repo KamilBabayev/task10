@@ -3,7 +3,7 @@ spring:
     name: task-service
   datasource:
     url: jdbc:postgresql://localhost:5432/taskdb
-    username: taskuser
+    username: postgres
     password: admin123
     driverClassName: org.postgresql.Driver
   jpa:
