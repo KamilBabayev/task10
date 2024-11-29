@@ -16,10 +16,6 @@ RUN chmod +x gradlew
 
 RUN ./gradlew build
 
-RUN ls /app/
-RUN ls /app/build/
-RUN ls /app/build/libs/
-
 FROM openjdk:17-jdk-slim
 
 WORKDIR /app

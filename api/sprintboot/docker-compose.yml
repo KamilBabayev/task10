@@ -13,7 +13,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=admin123
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - VAR1="dockercomposeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      - VAR1="test purpose variable"
     depends_on:
       - db
 
